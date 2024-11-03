@@ -30,16 +30,16 @@ public class BusinessController {
         return ResponseEntity.ok(businesses);
     }
 
-    @GetMapping("/validated-enabled")
-    public ResponseEntity<List<Business>> getValidatedEnabledBusinesses() {
-        List<Business> businesses = businessService.getValidatedEnabledBusinesses();
+    @GetMapping("/enabled")
+    public ResponseEntity<List<Business>> getEnabledBusinesses() {
+        List<Business> businesses = businessService.getEnabledBusinesses();
         return ResponseEntity.ok(businesses);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    @GetMapping("/validated-disabled")
-    public ResponseEntity<List<Business>> getValidatedDisableBusinesses() {
-        List<Business> businesses = businessService.getValidatedDisabledBusinesses();
+    @GetMapping("/disabled")
+    public ResponseEntity<List<Business>> getDisableBusinesses() {
+        List<Business> businesses = businessService.getDisabledBusinesses();
         return ResponseEntity.ok(businesses);
     }
 

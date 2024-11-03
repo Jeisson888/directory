@@ -6,7 +6,10 @@ import com.jenesano.directory.exception.BusinessAlreadyValidatedException;
 import com.jenesano.directory.exception.EntityNotFoundException;
 import com.jenesano.directory.repository.BusinessRepository;
 import com.jenesano.directory.repository.TypeBusinessRepository;
+import com.jenesano.directory.repository.UserRepository;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,22 +19,30 @@ public class BusinessService {
 
     private final BusinessRepository businessRepository;
     private final TypeBusinessRepository typeBusinessRepository;
+    private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
+    private final UserRepository userRepository;
 
     @Autowired
-    public BusinessService(BusinessRepository businessRepository, TypeBusinessRepository typeBusinessRepository) {
+    public BusinessService(BusinessRepository businessRepository, TypeBusinessRepository typeBusinessRepository, UserService userService, PasswordEncoder passwordEncoder, EmailService emailService, UserRepository userRepository) {
         this.businessRepository = businessRepository;
         this.typeBusinessRepository = typeBusinessRepository;
+        this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
+        this.userRepository = userRepository;
     }
 
     public List<Business> getAllBusinesses() {
         return businessRepository.findAll();
     }
 
-    public List<Business> getValidatedEnabledBusinesses() {
+    public List<Business> getEnabledBusinesses() {
         return businessRepository.findByValidatedAndStatus(true, Status.ENABLED);
     }
 
-    public List<Business> getValidatedDisabledBusinesses() {
+    public List<Business> getDisabledBusinesses() {
         return businessRepository.findByValidatedAndStatus(true, Status.DISABLED);
     }
 
@@ -69,7 +80,7 @@ public class BusinessService {
                 false,
                 businessDTO.getStatus(),
                 typeBusiness,
-                null
+                userService.createOwnerUser(businessDTO.getEmail())
         );
 
         return businessRepository.save(business);
@@ -118,10 +129,14 @@ public class BusinessService {
             throw new BusinessAlreadyValidatedException(businessId);
         }
         business.setValidated(true);
-
-        // crear usuario y enviar correo
+        User user = business.getUser();
+        String randomPassword = RandomStringUtils.randomAlphanumeric(5);
+        user.setEncryptedPassword(passwordEncoder.encode(randomPassword));
+        user.setStatus(Status.ENABLED);
 
         businessRepository.save(business);
+        userRepository.save(user);
+        emailService.sendCredentialsToEmail(user.getEmail(), user.getUsername(), randomPassword);
     }
 
     public List<TypeBusiness> getAllTypesBusiness() {
@@ -168,7 +183,6 @@ public class BusinessService {
         if (locationDTO.getLatitude() == null || locationDTO.getLongitude() == null) {
             throw new IllegalArgumentException("La latitud y longitud de la localizacion no pueden ser nulas.");
         }
-
         Location location = new Location(locationDTO.getLatitude(), locationDTO.getLongitude());
         business.setLocation(location);
 
@@ -185,14 +199,12 @@ public class BusinessService {
                 throw new IllegalArgumentException("El dia de la semana, hora de apertura y hora de cierre del horario de negocio no pueden ser nulos.");
             }
         }
-
         List<BusinessHour> businessHours = businessHoursDTO.stream()
                 .map(businessHourDTO -> new BusinessHour(
                         businessHourDTO.getDayWeek(),
                         businessHourDTO.getOpeningTime(),
                         businessHourDTO.getClosingTime()))
                 .toList();
-
         business.getBusinessHours().clear();
         business.getBusinessHours().addAll(businessHours);
 
@@ -205,7 +217,6 @@ public class BusinessService {
         if (imageDTO.getUrl() == null || imageDTO.getUrl().isEmpty()) {
             throw new IllegalArgumentException("La url de la imagen no puede ser nula o vacia.");
         }
-
         Image image = new Image(imageDTO.getUrl());
         business.getImages().add(image);
 
@@ -246,7 +257,6 @@ public class BusinessService {
                 .filter(content -> content.getId().equals(businessContentId))
                 .findFirst()
                 .orElseThrow(() -> new EntityNotFoundException("Contenido de negocio", businessContentId));
-
         businessContent.setName(businessContentDTO.getName());
         businessContent.setDescription(businessContentDTO.getDescription());
         businessContent.setPrice(businessContentDTO.getPrice());
@@ -265,7 +275,6 @@ public class BusinessService {
         Business business = getBusinessById(businessId);
 
         boolean removed = business.getBusinessContents().removeIf(businessContent -> businessContent.getId().equals(businessContentId));
-
         if (!removed) {
             throw new EntityNotFoundException("Contenido de negocio", businessContentId);
         }
@@ -273,13 +282,11 @@ public class BusinessService {
         businessRepository.save(business);
     }
 
-    /*public Business addReview(Long businessId, Review review) {
-        // cambiar review por reviewDTO
+    /*public Business addReview(Long businessId, ReviewDTO reviewDTO) {
         return  null;
     }
 
-    public Business updateReview(Long businessId, Long reviewId, Review review) {
-        // cambiar review por reviewDTO
+    public Business updateReview(Long businessId, Long reviewId, ReviewDTO reviewDTO) {
         return  null;
     }
 

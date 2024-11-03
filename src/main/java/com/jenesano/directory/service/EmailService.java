@@ -15,16 +15,15 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
-    public void sendCredentialsEmail(String toEmail, String username, String password) {
+    public void sendCredentialsToEmail(String email, String username, String password) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(toEmail);
-        message.setSubject("Tus credenciales de acceso");
+        message.setTo(email);
+        message.setSubject("Credenciales de acceso");
         message.setText("Hola,\n\nTus credenciales de acceso son:\n\n" +
                 "Usuario: " + username + "\n" +
                 "Contraseña: " + password + "\n\n" +
-                "Por favor, cambia tu contraseña tras el primer inicio de sesión.\n\nSaludos,\nEquipo de soporte");
+                "Por favor, cambia tu contraseña tras el primer inicio de sesión.");
 
         mailSender.send(message);
     }
 }
-

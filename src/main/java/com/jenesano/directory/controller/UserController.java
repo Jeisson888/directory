@@ -1,5 +1,6 @@
 package com.jenesano.directory.controller;
 
+import com.jenesano.directory.dto.EmailDTO;
 import com.jenesano.directory.dto.LoginDTO;
 import com.jenesano.directory.dto.UserDTO;
 import com.jenesano.directory.entity.User;
@@ -37,17 +38,23 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    // ADMIN, MANAGER
-    @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody UserDTO userDTO) {
-        User user = userService.createUser(userDTO);
+    @PostMapping("/admin")
+    public ResponseEntity<User> createAdminUser(@RequestBody UserDTO userDTO) {
+        User user = userService.createAdminUser(userDTO);
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    @PutMapping("/{userId}")
-    public ResponseEntity<User> updateUser(@PathVariable Long userId, @RequestBody User user) {
-        return ResponseEntity.ok(null);
+    @PostMapping("/manager")
+    public ResponseEntity<User> createManagerUser(@RequestBody UserDTO userDTO) {
+        User user = userService.createManagerUser(userDTO);
+        return new ResponseEntity<>(user, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/tourist")
+    public ResponseEntity<User> createTouristUser(@RequestBody EmailDTO emailDTO) {
+        User user = userService.createTouristUser(emailDTO);
+        return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -65,11 +72,11 @@ public class UserController {
 
     @PostMapping("/refresh-token")
     public ResponseEntity<String> refreshToken() {
-        return ResponseEntity.ok(null);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout() {
-        return ResponseEntity.ok(null);
+        return ResponseEntity.noContent().build();
     }
 }

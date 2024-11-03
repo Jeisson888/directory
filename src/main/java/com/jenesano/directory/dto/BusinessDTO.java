@@ -12,6 +12,7 @@ public class BusinessDTO {
     private String commercialRegistration;
     private LocalDate registrationDate;
     private String legalRepresentative;
+    private String email;
     private String address;
     private String phoneNumber;
     private String website;
