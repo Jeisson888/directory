@@ -56,7 +56,7 @@ public class BusinessController {
         return ResponseEntity.ok(businesses);
     }
 
-    @GetMapping("/reviews/{review}")
+    @GetMapping("/review/{review}")
     public ResponseEntity<List<Business>> getAllBusinessesByReview(@PathVariable int review) {
         List<Business> businesses = businessService.getAllBusinessesByReview(review);
         return ResponseEntity.ok(businesses);
@@ -81,7 +81,7 @@ public class BusinessController {
         return ResponseEntity.ok(business);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @DeleteMapping("/{businessId}")
     public ResponseEntity<Void> deleteBusiness(@PathVariable Long businessId) {
         businessService.deleteBusiness(businessId);
@@ -102,9 +102,9 @@ public class BusinessController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/types/{businessId}")
-    public ResponseEntity<TypeBusiness> getTypeBusinessById(@PathVariable Long businessId) {
-        TypeBusiness typeBusiness = businessService.getTypeBusinessById(businessId);
+    @GetMapping("/types/{typeBusinessId}")
+    public ResponseEntity<TypeBusiness> getTypeBusinessById(@PathVariable Long typeBusinessId) {
+        TypeBusiness typeBusiness = businessService.getTypeBusinessById(typeBusinessId);
         return ResponseEntity.ok(typeBusiness);
     }
 
@@ -116,16 +116,16 @@ public class BusinessController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    @PutMapping("/types/{businessId}")
-    public ResponseEntity<TypeBusiness> updateTypeBusiness(@PathVariable Long businessId, @RequestBody TypeBusinessDTO typeBusinessDTO) {
-        TypeBusiness typeBusiness = businessService.updateTypeBusiness(businessId, typeBusinessDTO);
+    @PutMapping("/types/{typeBusinessId}")
+    public ResponseEntity<TypeBusiness> updateTypeBusiness(@PathVariable Long typeBusinessId, @RequestBody TypeBusinessDTO typeBusinessDTO) {
+        TypeBusiness typeBusiness = businessService.updateTypeBusiness(typeBusinessId, typeBusinessDTO);
         return ResponseEntity.ok(typeBusiness);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/types/{businessId}")
-    public ResponseEntity<Void> deleteTypeBusiness(@PathVariable Long businessId) {
-        businessService.deleteTypeBusiness(businessId);
+    @DeleteMapping("/types/{typeBusinessId}")
+    public ResponseEntity<Void> deleteTypeBusiness(@PathVariable Long typeBusinessId) {
+        businessService.deleteTypeBusiness(typeBusinessId);
         return ResponseEntity.noContent().build();
     }
 
@@ -175,6 +175,27 @@ public class BusinessController {
     @DeleteMapping("/{businessId}/contents/{businessContentId}")
     public ResponseEntity<Void> removeBusinessContent(@PathVariable Long businessId, @PathVariable Long businessContentId) {
         businessService.removeBusinessContent(businessId, businessContentId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'TOURIST')")
+    @PostMapping("/{businessId}/reviews")
+    public ResponseEntity<Business> addReview(@PathVariable Long businessId, @RequestBody ReviewDTO reviewDTO) {
+        Business business = businessService.addReview(businessId, reviewDTO);
+        return ResponseEntity.ok(business);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'TOURIST')")
+    @PutMapping("/{businessId}/reviews/{reviewId}")
+    public ResponseEntity<Business> updateReview(@PathVariable Long businessId, @PathVariable Long reviewId, @RequestBody ReviewDTO reviewDTO) {
+        Business business = businessService.updateReview(businessId, reviewId, reviewDTO);
+        return ResponseEntity.ok(business);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'TOURIST')")
+    @DeleteMapping("/{businessId}/reviews/{reviewId}")
+    public ResponseEntity<Void> removeReview(@PathVariable Long businessId, @PathVariable Long reviewId) {
+        businessService.removeReview(businessId, reviewId);
         return ResponseEntity.noContent().build();
     }
 }

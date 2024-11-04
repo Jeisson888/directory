@@ -1,10 +1,14 @@
 package com.jenesano.directory.service;
 
+import com.jenesano.directory.dto.ReviewDTO;
 import com.jenesano.directory.entity.Review;
+import com.jenesano.directory.entity.TypeReview;
+import com.jenesano.directory.exception.EntityNotFoundException;
 import com.jenesano.directory.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,29 +16,54 @@ import java.util.Optional;
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
+    private final UserService userService;
 
     @Autowired
-    public ReviewService(ReviewRepository reviewRepository) {
+    public ReviewService(ReviewRepository reviewRepository, UserService userService) {
         this.reviewRepository = reviewRepository;
+        this.userService = userService;
     }
 
     public List<Review> getAllReviews() {
-        return null;
+        return reviewRepository.findAll();
     }
 
-    public Optional<Review> getReviewById(Long id) {
-        return Optional.empty();
+    public List<Review> getWebsiteReviews() {
+        return reviewRepository.findByTypeReview(TypeReview.WEBSITE);
     }
 
-    public Review createReview(Review review) {
-        return null;
+    public Review getReviewById(Long reviewId) {
+        return reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new EntityNotFoundException("Reseña", reviewId));
     }
 
-    public Review updateReview(Long id, Review updatedReview) {
-        return null;
+    public Review createReview(ReviewDTO reviewDTO) {
+        //validar
+        Review review = new Review(
+                reviewDTO.getReview(),
+                reviewDTO.getDescription(),
+                LocalDate.now(),
+                TypeReview.WEBSITE,
+                userService.getUserById(reviewDTO.getUserId())
+        );
+
+        return reviewRepository.save(review);
     }
 
-    public void deleteReview(Long id) {
+    public Review updateReview(Long reviewId, ReviewDTO reviewDTO) {
+        Review review = getReviewById(reviewId);
 
+        //validar
+        review.setReview(reviewDTO.getReview());
+        review.setDescription(reviewDTO.getDescription());
+
+        return reviewRepository.save(review);
+    }
+
+    public void deleteReview(Long reviewId) {
+        if (!reviewRepository.existsById(reviewId)) {
+            throw new EntityNotFoundException("Reseña", reviewId);
+        }
+        reviewRepository.deleteById(reviewId);
     }
 }

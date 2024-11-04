@@ -6,6 +6,7 @@ import com.jenesano.directory.dto.UserDTO;
 import com.jenesano.directory.entity.Status;
 import com.jenesano.directory.entity.TypeUser;
 import com.jenesano.directory.entity.User;
+import com.jenesano.directory.exception.EmailAlreadyExistsException;
 import com.jenesano.directory.exception.EntityNotFoundException;
 import com.jenesano.directory.repository.UserRepository;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -51,6 +52,13 @@ public class UserService {
 
     public User createAdminUser(UserDTO userDTO) {
         // validar
+        if (userRepository.existsByUsername(userDTO.getUsername())) {
+            throw new EmailAlreadyExistsException(userDTO.getUsername());
+        }
+        if (userRepository.existsByEmail(userDTO.getEmail())) {
+            throw new EmailAlreadyExistsException(userDTO.getEmail());
+        }
+
         User user = new User(
                 userDTO.getUsername(),
                 passwordEncoder.encode(userDTO.getPassword()),
@@ -64,6 +72,13 @@ public class UserService {
 
     public User createManagerUser(UserDTO userDTO) {
         // validar
+        if (userRepository.existsByUsername(userDTO.getUsername())) {
+            throw new EmailAlreadyExistsException(userDTO.getUsername());
+        }
+        if (userRepository.existsByEmail(userDTO.getEmail())) {
+            throw new EmailAlreadyExistsException(userDTO.getEmail());
+        }
+
         User user = new User(
                 userDTO.getUsername(),
                 passwordEncoder.encode(userDTO.getPassword()),
@@ -77,15 +92,17 @@ public class UserService {
 
     public User createOwnerUser(String email) {
         // validar
-        String username = email.split("@")[0];
-
-        Optional<User> existingUser = userRepository.findByUsername(username);
+        Optional<User> existingUser = userRepository.findByEmail(email);
         if (existingUser.isPresent()) {
-            return existingUser.get();
+            if (existingUser.get().getTypeUser() == TypeUser.OWNER) {
+                return existingUser.get();
+            } else {
+                throw new EmailAlreadyExistsException(email);
+            }
         }
 
+        String username = email.split("@")[0];
         String randomPassword = RandomStringUtils.randomAlphanumeric(5);
-
         User user = new User(
                 username,
                 passwordEncoder.encode(randomPassword),
@@ -99,9 +116,12 @@ public class UserService {
 
     public User createTouristUser(EmailDTO emailDTO) {
         // validar
+        if (userRepository.existsByEmail(emailDTO.getEmail())) {
+            throw new EmailAlreadyExistsException(emailDTO.getEmail());
+        }
+
         String username = emailDTO.getEmail().split("@")[0];
         String randomPassword = RandomStringUtils.randomAlphanumeric(5);
-
         User user = new User(
                 username,
                 passwordEncoder.encode(randomPassword),

@@ -7,5 +7,5 @@ public class BusinessContentDTO {
     private String name;
     private String description;
     private Integer price;
-    private String urlImage;
+    private String imageUrl;
 }

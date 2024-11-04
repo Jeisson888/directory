@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -242,7 +243,7 @@ public class BusinessService {
                 businessContentDTO.getName(),
                 businessContentDTO.getDescription(),
                 businessContentDTO.getPrice(),
-                new Image(businessContentDTO.getUrlImage())
+                new Image(businessContentDTO.getImageUrl())
         );
         business.getBusinessContents().add(businessContent);
 
@@ -253,14 +254,14 @@ public class BusinessService {
         Business business = getBusinessById(businessId);
 
         validateBusinessContent(businessContentDTO);
-        BusinessContent businessContent = business.getBusinessContents().stream()
-                .filter(content -> content.getId().equals(businessContentId))
+        BusinessContent businessContentToUpdate = business.getBusinessContents().stream()
+                .filter(businessContent -> businessContent.getId().equals(businessContentId))
                 .findFirst()
                 .orElseThrow(() -> new EntityNotFoundException("Contenido de negocio", businessContentId));
-        businessContent.setName(businessContentDTO.getName());
-        businessContent.setDescription(businessContentDTO.getDescription());
-        businessContent.setPrice(businessContentDTO.getPrice());
-        businessContent.setImage(new Image(businessContentDTO.getUrlImage()));
+        businessContentToUpdate.setName(businessContentDTO.getName());
+        businessContentToUpdate.setDescription(businessContentDTO.getDescription());
+        businessContentToUpdate.setPrice(businessContentDTO.getPrice());
+        businessContentToUpdate.setImage(new Image(businessContentDTO.getImageUrl()));
 
         return businessRepository.save(business);
     }
@@ -282,15 +283,44 @@ public class BusinessService {
         businessRepository.save(business);
     }
 
-    /*public Business addReview(Long businessId, ReviewDTO reviewDTO) {
-        return  null;
+    public Business addReview(Long businessId, ReviewDTO reviewDTO) {
+        Business business = getBusinessById(businessId);
+
+        //validar
+        Review review = new Review(
+                reviewDTO.getReview(),
+                reviewDTO.getDescription(),
+                LocalDate.now(),
+                TypeReview.BUSINESS,
+                userService.getUserById(reviewDTO.getUserId())
+        );
+        business.getReviews().add(review);
+
+        return  businessRepository.save(business);
     }
 
     public Business updateReview(Long businessId, Long reviewId, ReviewDTO reviewDTO) {
-        return  null;
+        Business business = getBusinessById(businessId);
+
+        //validar
+        Review reviewToUpdate = business.getReviews().stream()
+                .filter(review -> review.getId().equals(reviewId))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("Reseña", reviewId));
+        reviewToUpdate.setReview(reviewDTO.getReview());
+        reviewToUpdate.setDescription(reviewDTO.getDescription());
+
+        return  businessRepository.save(business);
     }
 
     public void removeReview(Long businessId, Long reviewId) {
+        Business business = getBusinessById(businessId);
 
-    }*/
+        boolean removed = business.getReviews().removeIf(review -> review.getId().equals(reviewId));
+        if (!removed) {
+            throw new EntityNotFoundException("Reseña", reviewId);
+        }
+
+        businessRepository.save(business);
+    }
 }
