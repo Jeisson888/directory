@@ -38,7 +38,7 @@ public class ReviewService {
     }
 
     public Review createReview(ReviewDTO reviewDTO) {
-        //validar
+        // validar
         Review review = new Review(
                 reviewDTO.getReview(),
                 reviewDTO.getDescription(),
@@ -53,7 +53,7 @@ public class ReviewService {
     public Review updateReview(Long reviewId, ReviewDTO reviewDTO) {
         Review review = getReviewById(reviewId);
 
-        //validar
+        // validar
         review.setReview(reviewDTO.getReview());
         review.setDescription(reviewDTO.getDescription());
 

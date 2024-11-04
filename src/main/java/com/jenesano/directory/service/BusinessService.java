@@ -224,12 +224,12 @@ public class BusinessService {
         return businessRepository.save(business);
     }
 
-    public void removeImage(Long businessId, Long idImage) {
+    public void removeImage(Long businessId, Long imageId) {
         Business business = getBusinessById(businessId);
 
-        boolean removed = business.getImages().removeIf(image -> image.getId().equals(idImage));
+        boolean removed = business.getImages().removeIf(image -> image.getId().equals(imageId));
         if (!removed) {
-            throw new EntityNotFoundException("Imagen", idImage);
+            throw new EntityNotFoundException("Imagen", imageId);
         }
 
         businessRepository.save(business);

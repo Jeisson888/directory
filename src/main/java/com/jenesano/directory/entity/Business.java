@@ -86,9 +86,9 @@ public class Business {
         this.typeBusiness = typeBusiness;
         this.user = user;
 
-        this.businessHours = new ArrayList<>();
-        this.images = new ArrayList<>();
-        this.businessContents = new ArrayList<>();
-        this.reviews = new ArrayList<>();
+        businessHours = new ArrayList<>();
+        images = new ArrayList<>();
+        businessContents = new ArrayList<>();
+        reviews = new ArrayList<>();
     }
 }

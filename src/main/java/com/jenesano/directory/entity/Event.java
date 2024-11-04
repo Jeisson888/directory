@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -29,10 +30,11 @@ public class Event {
     @JoinColumn(name = "event_id")
     private List<Image> images;
 
-    public Event(String name, String description, LocalDate date, List<Image> images) {
+    public Event(String name, String description, LocalDate date) {
         this.name = name;
         this.description = description;
         this.date = date;
-        this.images = images;
+
+        images = new ArrayList<>();
     }
 }
