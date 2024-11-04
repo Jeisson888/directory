@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -29,10 +30,11 @@ public class TouristPlace {
     @JoinColumn(name = "tourist_place_id")
     private List<Image> images;
 
-    public TouristPlace(String name, String description, Location location, List<Image> images) {
+    public TouristPlace(String name, String description) {
         this.name = name;
         this.description = description;
-        this.location = location;
-        this.images = images;
+
+        location = new Location(0.0, 0.0);
+        images = new ArrayList<>();
     }
 }

@@ -86,6 +86,7 @@ public class Business {
         this.typeBusiness = typeBusiness;
         this.user = user;
 
+        location = new Location(0.0, 0.0);
         businessHours = new ArrayList<>();
         images = new ArrayList<>();
         businessContents = new ArrayList<>();

@@ -184,8 +184,8 @@ public class BusinessService {
         if (locationDTO.getLatitude() == null || locationDTO.getLongitude() == null) {
             throw new IllegalArgumentException("La latitud y longitud de la localizacion no pueden ser nulas.");
         }
-        Location location = new Location(locationDTO.getLatitude(), locationDTO.getLongitude());
-        business.setLocation(location);
+        business.getLocation().setLatitude(locationDTO.getLatitude());
+        business.getLocation().setLongitude(locationDTO.getLongitude());
 
         return businessRepository.save(business);
     }
@@ -286,7 +286,7 @@ public class BusinessService {
     public Business addReview(Long businessId, ReviewDTO reviewDTO) {
         Business business = getBusinessById(businessId);
 
-        //validar
+        // validar
         Review review = new Review(
                 reviewDTO.getReview(),
                 reviewDTO.getDescription(),
@@ -302,7 +302,7 @@ public class BusinessService {
     public Business updateReview(Long businessId, Long reviewId, ReviewDTO reviewDTO) {
         Business business = getBusinessById(businessId);
 
-        //validar
+        // validar
         Review reviewToUpdate = business.getReviews().stream()
                 .filter(review -> review.getId().equals(reviewId))
                 .findFirst()

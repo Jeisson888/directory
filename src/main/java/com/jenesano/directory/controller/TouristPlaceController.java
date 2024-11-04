@@ -1,9 +1,14 @@
 package com.jenesano.directory.controller;
 
+import com.jenesano.directory.dto.ImageDTO;
+import com.jenesano.directory.dto.LocationDTO;
+import com.jenesano.directory.dto.TouristPlaceDTO;
 import com.jenesano.directory.entity.TouristPlace;
 import com.jenesano.directory.service.TouristPlaceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,26 +27,55 @@ public class TouristPlaceController {
 
     @GetMapping
     public ResponseEntity<List<TouristPlace>> getAllTouristPlaces() {
-        return ResponseEntity.ok().body(null);
+        List<TouristPlace> touristPlaces = touristPlaceService.getAllTouristPlaces();
+        return ResponseEntity.ok(touristPlaces);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Optional<TouristPlace>> getTouristPlaceById(@PathVariable Long id) {
-        return ResponseEntity.ok().body(Optional.empty());
+    @GetMapping("/{touristPlaceId}")
+    public ResponseEntity<TouristPlace> getTouristPlaceById(@PathVariable Long touristPlaceId) {
+        TouristPlace touristPlace = touristPlaceService.getTouristPlaceById(touristPlaceId);
+        return ResponseEntity.ok(touristPlace);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @PostMapping
-    public ResponseEntity<TouristPlace> createTouristPlace(@RequestBody TouristPlace touristPlace) {
-        return ResponseEntity.ok().body(null);
+    public ResponseEntity<TouristPlace> createTouristPlace(@RequestBody TouristPlaceDTO touristPlaceDTO) {
+        TouristPlace touristPlace = touristPlaceService.createTouristPlace(touristPlaceDTO);
+        return new ResponseEntity<>(touristPlace, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<TouristPlace> updateTouristPlace(@PathVariable Long id, @RequestBody TouristPlace touristPlace) {
-        return ResponseEntity.ok().body(null);
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @PutMapping("/{touristPlaceId}")
+    public ResponseEntity<TouristPlace> updateTouristPlace(@PathVariable Long touristPlaceId, @RequestBody TouristPlaceDTO touristPlaceDTO) {
+        TouristPlace touristPlace = touristPlaceService.updateTouristPlace(touristPlaceId, touristPlaceDTO);
+        return ResponseEntity.ok(touristPlace);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTouristPlace(@PathVariable Long id) {
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @DeleteMapping("/{touristPlaceId}")
+    public ResponseEntity<Void> deleteTouristPlace(@PathVariable Long touristPlaceId) {
+        touristPlaceService.deleteTouristPlace(touristPlaceId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @PostMapping("/{touristPlaceId}/images")
+    public ResponseEntity<TouristPlace> addImage(@PathVariable Long touristPlaceId, @RequestBody ImageDTO imageDTO) {
+        TouristPlace touristPlace = touristPlaceService.addImage(touristPlaceId, imageDTO);
+        return ResponseEntity.ok(touristPlace);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @DeleteMapping("/{touristPlaceId}/images/{imageId}")
+    public ResponseEntity<Void> removeImage(@PathVariable Long touristPlaceId, @PathVariable Long imageId) {
+        touristPlaceService.removeImage(touristPlaceId, imageId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @PostMapping("/{touristPlaceId}/location")
+    public ResponseEntity<TouristPlace> setLocation(@PathVariable Long touristPlaceId, @RequestBody LocationDTO locationDTO) {
+        TouristPlace touristPlace = touristPlaceService.setLocation(touristPlaceId, locationDTO);
+        return ResponseEntity.ok(touristPlace);
     }
 }
