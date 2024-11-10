@@ -217,7 +217,7 @@ public class BusinessService {
         Business business = getBusinessById(businessId);
 
         for (BusinessHourDTO businessHourDTO : businessHoursDTO) {
-            if (businessHourDTO.getDayWeek() == null  || businessHourDTO.getOpeningTime() == null
+            if (businessHourDTO.getDayWeek() == null || businessHourDTO.getOpeningTime() == null
                     || businessHourDTO.getClosingTime() == null) {
                 throw new IllegalArgumentException("El dia de la semana, hora de apertura y hora de cierre del horario de negocio no pueden ser nulos.");
             }

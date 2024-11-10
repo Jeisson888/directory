@@ -33,8 +33,8 @@ public class TouristPlaceService {
     public TouristPlace createTouristPlace(TouristPlaceDTO touristPlaceDTO) {
         validateTouristPlaceDTO(touristPlaceDTO);
         TouristPlace touristPlace = new TouristPlace(
-               touristPlaceDTO.getName(),
-               touristPlaceDTO.getDescription()
+                touristPlaceDTO.getName(),
+                touristPlaceDTO.getDescription()
         );
 
         return touristPlaceRepository.save(touristPlace);

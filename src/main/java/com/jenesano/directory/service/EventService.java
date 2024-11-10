@@ -38,12 +38,12 @@ public class EventService {
     public Event createEvent(EventDTO eventDTO) {
         validateEventDTO(eventDTO);
         Event event = new Event(
-              eventDTO.getName(),
-              eventDTO.getDescription(),
-              eventDTO.getDate()
+                eventDTO.getName(),
+                eventDTO.getDescription(),
+                eventDTO.getDate()
         );
 
-        return  eventRepository.save(event);
+        return eventRepository.save(event);
     }
 
     public Event updateEvent(Long eventId, EventDTO eventDTO) {
