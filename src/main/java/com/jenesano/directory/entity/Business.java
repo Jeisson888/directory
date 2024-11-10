@@ -35,7 +35,8 @@ public class Business {
     private String website;
     private String description;
 
-    private boolean validated;
+    @NotNull
+    private Boolean validated;
 
     @NotNull
     @Enumerated(EnumType.STRING)

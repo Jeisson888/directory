@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class EventService {
@@ -37,7 +36,7 @@ public class EventService {
     }
 
     public Event createEvent(EventDTO eventDTO) {
-        // validar
+        validateEventDTO(eventDTO);
         Event event = new Event(
               eventDTO.getName(),
               eventDTO.getDescription(),
@@ -50,12 +49,18 @@ public class EventService {
     public Event updateEvent(Long eventId, EventDTO eventDTO) {
         Event event = getEventById(eventId);
 
-        // validar
+        validateEventDTO(eventDTO);
         event.setName(eventDTO.getName());
         event.setDescription(eventDTO.getDescription());
         event.setDate(eventDTO.getDate());
 
         return eventRepository.save(event);
+    }
+
+    private void validateEventDTO(EventDTO eventDTO) {
+        if (eventDTO.getName() == null || eventDTO.getName().isEmpty() || eventDTO.getDate() == null) {
+            throw new IllegalArgumentException("El nombre y fecha del evento no pueden ser nulos o vacios.");
+        }
     }
 
     public void deleteEvent(Long eventId) {

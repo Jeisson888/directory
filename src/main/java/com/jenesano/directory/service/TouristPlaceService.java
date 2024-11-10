@@ -32,7 +32,7 @@ public class TouristPlaceService {
     }
 
     public TouristPlace createTouristPlace(TouristPlaceDTO touristPlaceDTO) {
-        // validar
+        validateTouristPlaceDTO(touristPlaceDTO);
         TouristPlace touristPlace = new TouristPlace(
                touristPlaceDTO.getName(),
                touristPlaceDTO.getDescription()
@@ -44,11 +44,17 @@ public class TouristPlaceService {
     public TouristPlace updateTouristPlace(Long touristPlaceId, TouristPlaceDTO touristPlaceDTO) {
         TouristPlace touristPlace = getTouristPlaceById(touristPlaceId);
 
-        // validar
+        validateTouristPlaceDTO(touristPlaceDTO);
         touristPlace.setName(touristPlaceDTO.getName());
         touristPlace.setDescription(touristPlaceDTO.getDescription());
 
         return touristPlaceRepository.save(touristPlace);
+    }
+
+    private void validateTouristPlaceDTO(TouristPlaceDTO touristPlaceDTO) {
+        if (touristPlaceDTO.getName() == null || touristPlaceDTO.getName().isEmpty()) {
+            throw new IllegalArgumentException("El nombre del sitio turistico no puede ser nulo o vacio.");
+        }
     }
 
     public void deleteTouristPlace(Long touristPlaceId) {
@@ -84,9 +90,6 @@ public class TouristPlaceService {
     public TouristPlace setLocation(Long touristPlaceId, LocationDTO locationDTO) {
         TouristPlace touristPlace = getTouristPlaceById(touristPlaceId);
 
-        if (locationDTO.getLatitude() == null || locationDTO.getLongitude() == null) {
-            throw new IllegalArgumentException("La latitud y longitud de la localizacion no pueden ser nulas.");
-        }
         touristPlace.getLocation().setLatitude(locationDTO.getLatitude());
         touristPlace.getLocation().setLongitude(locationDTO.getLongitude());
 

@@ -2,12 +2,14 @@ package com.jenesano.directory.service;
 
 import com.jenesano.directory.dto.EmailDTO;
 import com.jenesano.directory.dto.LoginDTO;
+import com.jenesano.directory.dto.LoginResponseDTO;
 import com.jenesano.directory.dto.UserDTO;
 import com.jenesano.directory.entity.Status;
 import com.jenesano.directory.entity.TypeUser;
 import com.jenesano.directory.entity.User;
 import com.jenesano.directory.exception.EmailAlreadyExistsException;
 import com.jenesano.directory.exception.EntityNotFoundException;
+import com.jenesano.directory.exception.UsernameAlreadyExistsException;
 import com.jenesano.directory.repository.UserRepository;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -51,14 +54,13 @@ public class UserService {
     }
 
     public User createAdminUser(UserDTO userDTO) {
-        // validar
+        validateUserDTO(userDTO);
         if (userRepository.existsByUsername(userDTO.getUsername())) {
-            throw new EmailAlreadyExistsException(userDTO.getUsername());
+            throw new UsernameAlreadyExistsException(userDTO.getUsername());
         }
         if (userRepository.existsByEmail(userDTO.getEmail())) {
             throw new EmailAlreadyExistsException(userDTO.getEmail());
         }
-
         User user = new User(
                 userDTO.getUsername(),
                 passwordEncoder.encode(userDTO.getPassword()),
@@ -71,14 +73,13 @@ public class UserService {
     }
 
     public User createManagerUser(UserDTO userDTO) {
-        // validar
+        validateUserDTO(userDTO);
         if (userRepository.existsByUsername(userDTO.getUsername())) {
-            throw new EmailAlreadyExistsException(userDTO.getUsername());
+            throw new UsernameAlreadyExistsException(userDTO.getUsername());
         }
         if (userRepository.existsByEmail(userDTO.getEmail())) {
             throw new EmailAlreadyExistsException(userDTO.getEmail());
         }
-
         User user = new User(
                 userDTO.getUsername(),
                 passwordEncoder.encode(userDTO.getPassword()),
@@ -90,8 +91,17 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    private void validateUserDTO(UserDTO userDTO) {
+        if (userDTO.getUsername() == null || userDTO.getUsername().isEmpty() || userDTO.getPassword() == null
+                || userDTO.getPassword().isEmpty() || userDTO.getEmail() == null || userDTO.getEmail().isEmpty()) {
+            throw new IllegalArgumentException("El nombre de usuario, contraseña y correo del usuario no pueden ser nulos o vacios.");
+        }
+    }
+
     public User createOwnerUser(String email) {
-        // validar
+        if (email == null || email.isEmpty()) {
+            throw new IllegalArgumentException("El correo del usuario no puede ser nulo o vacio.");
+        }
         Optional<User> existingUser = userRepository.findByEmail(email);
         if (existingUser.isPresent()) {
             if (existingUser.get().getTypeUser() == TypeUser.OWNER) {
@@ -100,7 +110,6 @@ public class UserService {
                 throw new EmailAlreadyExistsException(email);
             }
         }
-
         String username = email.split("@")[0];
         String randomPassword = RandomStringUtils.randomAlphanumeric(5);
         User user = new User(
@@ -115,11 +124,12 @@ public class UserService {
     }
 
     public User createTouristUser(EmailDTO emailDTO) {
-        // validar
+        if (emailDTO.getEmail() == null || emailDTO.getEmail().isEmpty()) {
+            throw new IllegalArgumentException("El correo del usuario no puede ser nulo o vacio.");
+        }
         if (userRepository.existsByEmail(emailDTO.getEmail())) {
             throw new EmailAlreadyExistsException(emailDTO.getEmail());
         }
-
         String username = emailDTO.getEmail().split("@")[0];
         String randomPassword = RandomStringUtils.randomAlphanumeric(5);
         User user = new User(
@@ -130,8 +140,8 @@ public class UserService {
                 TypeUser.TOURIST
         );
 
-        userRepository.save(user);
         emailService.sendCredentialsToEmail(emailDTO.getEmail(), username, randomPassword);
+        userRepository.save(user);
         return user;
     }
 
@@ -160,8 +170,11 @@ public class UserService {
         userRepository.deleteById(userId);
     }
 
-    public String login(LoginDTO loginDTO) {
-        // validar
+    public LoginResponseDTO login(LoginDTO loginDTO) {
+        if (loginDTO.getUsername() == null || loginDTO.getUsername().isEmpty()
+                || loginDTO.getPassword() == null || loginDTO.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("El nombre de usuario y contraseña no pueden ser nulos o vacios.");
+        }
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginDTO.getUsername(),
@@ -170,7 +183,10 @@ public class UserService {
         );
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(loginDTO.getUsername());
-        return jwtService.generateToken(userDetails);
+        String jwt = jwtService.generateToken(userDetails);
+        User user = userRepository.findByUsername(loginDTO.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario con nombre de usuario " + loginDTO.getUsername() + " no encontrado."));
+        return new LoginResponseDTO(user.getId(), jwt, user.getTypeUser());
     }
 
     public String refreshToken() {

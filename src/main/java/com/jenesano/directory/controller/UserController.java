@@ -2,6 +2,7 @@ package com.jenesano.directory.controller;
 
 import com.jenesano.directory.dto.EmailDTO;
 import com.jenesano.directory.dto.LoginDTO;
+import com.jenesano.directory.dto.LoginResponseDTO;
 import com.jenesano.directory.dto.UserDTO;
 import com.jenesano.directory.entity.User;
 import com.jenesano.directory.service.UserService;
@@ -65,9 +66,9 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginDTO loginDTO) {
-        String jwt = userService.login(loginDTO);
-        return ResponseEntity.ok(jwt);
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginDTO loginDTO) {
+        LoginResponseDTO loginResponseDTO = userService.login(loginDTO);
+        return ResponseEntity.ok(loginResponseDTO);
     }
 
     @PostMapping("/refresh-token")

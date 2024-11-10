@@ -38,7 +38,7 @@ public class ReviewService {
     }
 
     public Review createReview(ReviewDTO reviewDTO) {
-        // validar
+        validateReviewDTO(reviewDTO);
         Review review = new Review(
                 reviewDTO.getReview(),
                 reviewDTO.getDescription(),
@@ -53,11 +53,17 @@ public class ReviewService {
     public Review updateReview(Long reviewId, ReviewDTO reviewDTO) {
         Review review = getReviewById(reviewId);
 
-        // validar
+        validateReviewDTO(reviewDTO);
         review.setReview(reviewDTO.getReview());
         review.setDescription(reviewDTO.getDescription());
 
         return reviewRepository.save(review);
+    }
+
+    private void validateReviewDTO(ReviewDTO reviewDTO) {
+        if (reviewDTO.getReview() < 0 || reviewDTO.getReview() > 5) {
+            throw new IllegalArgumentException("La review debe estar entre 0 y 5.");
+        }
     }
 
     public void deleteReview(Long reviewId) {

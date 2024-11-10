@@ -15,14 +15,14 @@ public class User {
     private Long id;
 
     @NotNull
-    @Column(unique = true)
+    @Column(unique = true, updatable = false)
     private String username;
 
     @NotNull
     private String encryptedPassword;
 
     @NotNull
-    @Column(unique = true)
+    @Column(unique = true, updatable = false)
     private String email;
 
     @NotNull

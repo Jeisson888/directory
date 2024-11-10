@@ -9,11 +9,11 @@ import java.util.List;
 
 @Repository
 public interface BusinessRepository extends JpaRepository<Business, Long> {
-    List<Business> findByValidatedAndStatus(boolean validated, Status status);
-
     List<Business> findByValidated(boolean validated);
+
+    List<Business> findByValidatedAndStatus(boolean validated, Status status);
 
     List<Business> findByValidatedAndStatusAndTypeBusinessId(boolean validated, Status status, Long typeBusinessId);
 
-    List<Business> findByValidatedAndStatusAndReviewsReview(boolean validated, Status status, int review);
+    List<Business> findByValidatedAndStatusAndUserId(boolean validated, Status status, Long userId);
 }

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BusinessService {
@@ -26,7 +27,9 @@ public class BusinessService {
     private final UserRepository userRepository;
 
     @Autowired
-    public BusinessService(BusinessRepository businessRepository, TypeBusinessRepository typeBusinessRepository, UserService userService, PasswordEncoder passwordEncoder, EmailService emailService, UserRepository userRepository) {
+    public BusinessService(BusinessRepository businessRepository, TypeBusinessRepository typeBusinessRepository,
+                           UserService userService, PasswordEncoder passwordEncoder, EmailService emailService,
+                           UserRepository userRepository) {
         this.businessRepository = businessRepository;
         this.typeBusinessRepository = typeBusinessRepository;
         this.userService = userService;
@@ -51,12 +54,26 @@ public class BusinessService {
         return businessRepository.findByValidated(false);
     }
 
+    public List<Business> getAllBusinessesByUser(Long userId) {
+        return businessRepository.findByValidatedAndStatusAndUserId(true, Status.ENABLED, userId);
+    }
+
     public List<Business> getAllBusinessesByTypeBusiness(Long typeBusinessId) {
         return businessRepository.findByValidatedAndStatusAndTypeBusinessId(true, Status.ENABLED, typeBusinessId);
     }
 
     public List<Business> getAllBusinessesByReview(int review) {
-        return businessRepository.findByValidatedAndStatusAndReviewsReview(true, Status.ENABLED, review);
+        List<Business> businesses = getEnabledBusinesses();
+
+        return businesses.stream()
+                .filter(business -> {
+                    double averageReview = business.getReviews().stream()
+                            .mapToInt(Review::getReview)
+                            .average()
+                            .orElse(0.0);
+                    return averageReview > (review - 1) && averageReview <= review;
+                })
+                .collect(Collectors.toList());
     }
 
     public Business getBusinessById(Long businessId) {
@@ -64,10 +81,19 @@ public class BusinessService {
                 .orElseThrow(() -> new EntityNotFoundException("Negocio", businessId));
     }
 
+    public double getAverageReview(Long businessId) {
+        Business business = getBusinessById(businessId);
+
+        return business.getReviews().stream()
+                .mapToInt(Review::getReview)
+                .average()
+                .orElse(0.0);
+    }
+
     public Business createBusiness(BusinessDTO businessDTO) {
         TypeBusiness typeBusiness = getTypeBusinessById(businessDTO.getTypeBusinessId());
 
-        validateBusiness(businessDTO);
+        validateBusinessDTO(businessDTO);
         Business business = new Business(
                 businessDTO.getName(),
                 businessDTO.getRut(),
@@ -91,7 +117,7 @@ public class BusinessService {
         Business business = getBusinessById(businessId);
         TypeBusiness typeBusiness = getTypeBusinessById(businessDTO.getTypeBusinessId());
 
-        validateBusiness(businessDTO);
+        validateBusinessDTO(businessDTO);
         business.setName(businessDTO.getName());
         business.setRut(businessDTO.getRut());
         business.setCommercialRegistration(businessDTO.getCommercialRegistration());
@@ -107,7 +133,7 @@ public class BusinessService {
         return businessRepository.save(business);
     }
 
-    private void validateBusiness(BusinessDTO businessDTO) {
+    private void validateBusinessDTO(BusinessDTO businessDTO) {
         if (businessDTO.getName() == null || businessDTO.getName().isEmpty()
                 || businessDTO.getRut() == null || businessDTO.getRut().isEmpty()
                 || businessDTO.getLegalRepresentative() == null || businessDTO.getLegalRepresentative().isEmpty()
@@ -126,7 +152,7 @@ public class BusinessService {
     public void validateBusiness(Long businessId) {
         Business business = getBusinessById(businessId);
 
-        if (business.isValidated()) {
+        if (business.getValidated()) {
             throw new BusinessAlreadyValidatedException(businessId);
         }
         business.setValidated(true);
@@ -150,7 +176,7 @@ public class BusinessService {
     }
 
     public TypeBusiness createTypeBusiness(TypeBusinessDTO typeBusinessDTO) {
-        validateTypeBusiness(typeBusinessDTO);
+        validateTypeBusinessDTO(typeBusinessDTO);
         TypeBusiness typeBusiness = new TypeBusiness(typeBusinessDTO.getName());
 
         return typeBusinessRepository.save(typeBusiness);
@@ -159,13 +185,13 @@ public class BusinessService {
     public TypeBusiness updateTypeBusiness(Long typeBusinessId, TypeBusinessDTO typeBusinessDTO) {
         TypeBusiness typeBusiness = getTypeBusinessById(typeBusinessId);
 
-        validateTypeBusiness(typeBusinessDTO);
+        validateTypeBusinessDTO(typeBusinessDTO);
         typeBusiness.setName(typeBusinessDTO.getName());
 
         return typeBusinessRepository.save(typeBusiness);
     }
 
-    private void validateTypeBusiness(TypeBusinessDTO typeBusinessDTO) {
+    private void validateTypeBusinessDTO(TypeBusinessDTO typeBusinessDTO) {
         if (typeBusinessDTO.getName() == null || typeBusinessDTO.getName().isEmpty()) {
             throw new IllegalArgumentException("El nombre del tipo de negocio no puede ser nulo o vacio.");
         }
@@ -181,9 +207,6 @@ public class BusinessService {
     public Business setLocation(Long businessId, LocationDTO locationDTO) {
         Business business = getBusinessById(businessId);
 
-        if (locationDTO.getLatitude() == null || locationDTO.getLongitude() == null) {
-            throw new IllegalArgumentException("La latitud y longitud de la localizacion no pueden ser nulas.");
-        }
         business.getLocation().setLatitude(locationDTO.getLatitude());
         business.getLocation().setLongitude(locationDTO.getLongitude());
 
@@ -194,8 +217,7 @@ public class BusinessService {
         Business business = getBusinessById(businessId);
 
         for (BusinessHourDTO businessHourDTO : businessHoursDTO) {
-            if (businessHourDTO.getDayWeek() == null
-                    || businessHourDTO.getOpeningTime() == null
+            if (businessHourDTO.getDayWeek() == null  || businessHourDTO.getOpeningTime() == null
                     || businessHourDTO.getClosingTime() == null) {
                 throw new IllegalArgumentException("El dia de la semana, hora de apertura y hora de cierre del horario de negocio no pueden ser nulos.");
             }
@@ -238,7 +260,7 @@ public class BusinessService {
     public Business addBusinessContent(Long businessId, BusinessContentDTO businessContentDTO) {
         Business business = getBusinessById(businessId);
 
-        validateBusinessContent(businessContentDTO);
+        validateBusinessContentDTO(businessContentDTO);
         BusinessContent businessContent = new BusinessContent(
                 businessContentDTO.getName(),
                 businessContentDTO.getDescription(),
@@ -253,7 +275,7 @@ public class BusinessService {
     public Business updateBusinessContent(Long businessId, Long businessContentId, BusinessContentDTO businessContentDTO) {
         Business business = getBusinessById(businessId);
 
-        validateBusinessContent(businessContentDTO);
+        validateBusinessContentDTO(businessContentDTO);
         BusinessContent businessContentToUpdate = business.getBusinessContents().stream()
                 .filter(businessContent -> businessContent.getId().equals(businessContentId))
                 .findFirst()
@@ -266,7 +288,7 @@ public class BusinessService {
         return businessRepository.save(business);
     }
 
-    private void validateBusinessContent(BusinessContentDTO businessContentDTO) {
+    private void validateBusinessContentDTO(BusinessContentDTO businessContentDTO) {
         if (businessContentDTO.getName() == null || businessContentDTO.getName().isEmpty()) {
             throw new IllegalArgumentException("El nombre del contenido de negocio no puede ser nulo o vacio.");
         }
@@ -285,24 +307,25 @@ public class BusinessService {
 
     public Business addReview(Long businessId, ReviewDTO reviewDTO) {
         Business business = getBusinessById(businessId);
+        User user = userService.getUserById(reviewDTO.getUserId());
 
-        // validar
+        validateReviewDTO(reviewDTO);
         Review review = new Review(
                 reviewDTO.getReview(),
                 reviewDTO.getDescription(),
                 LocalDate.now(),
                 TypeReview.BUSINESS,
-                userService.getUserById(reviewDTO.getUserId())
+                user
         );
         business.getReviews().add(review);
 
-        return  businessRepository.save(business);
+        return businessRepository.save(business);
     }
 
     public Business updateReview(Long businessId, Long reviewId, ReviewDTO reviewDTO) {
         Business business = getBusinessById(businessId);
 
-        // validar
+        validateReviewDTO(reviewDTO);
         Review reviewToUpdate = business.getReviews().stream()
                 .filter(review -> review.getId().equals(reviewId))
                 .findFirst()
@@ -310,7 +333,13 @@ public class BusinessService {
         reviewToUpdate.setReview(reviewDTO.getReview());
         reviewToUpdate.setDescription(reviewDTO.getDescription());
 
-        return  businessRepository.save(business);
+        return businessRepository.save(business);
+    }
+
+    private void validateReviewDTO(ReviewDTO reviewDTO) {
+        if (reviewDTO.getReview() < 0 || reviewDTO.getReview() > 5) {
+            throw new IllegalArgumentException("La review debe estar entre 0 y 5.");
+        }
     }
 
     public void removeReview(Long businessId, Long reviewId) {

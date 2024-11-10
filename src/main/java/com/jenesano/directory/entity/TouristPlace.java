@@ -20,6 +20,7 @@ public class TouristPlace {
     @NotNull
     private String name;
 
+    @Column(length = 2000)
     private String description;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)

@@ -50,6 +50,13 @@ public class BusinessController {
         return ResponseEntity.ok(businesses);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Business>> getAllBusinessesByUser(@PathVariable Long userId) {
+        List<Business> businesses = businessService.getAllBusinessesByUser(userId);
+        return ResponseEntity.ok(businesses);
+    }
+
     @GetMapping("/type/{typeBusinessId}")
     public ResponseEntity<List<Business>> getAllBusinessesByTypeBusiness(@PathVariable Long typeBusinessId) {
         List<Business> businesses = businessService.getAllBusinessesByTypeBusiness(typeBusinessId);
@@ -66,6 +73,12 @@ public class BusinessController {
     public ResponseEntity<Business> getBusinessById(@PathVariable Long businessId) {
         Business business = businessService.getBusinessById(businessId);
         return ResponseEntity.ok(business);
+    }
+
+    @GetMapping("/{businessId}/average-review")
+    public ResponseEntity<Double> getAverageReview(@PathVariable Long businessId) {
+        double averageReview = businessService.getAverageReview(businessId);
+        return ResponseEntity.ok(averageReview);
     }
 
     @PostMapping
