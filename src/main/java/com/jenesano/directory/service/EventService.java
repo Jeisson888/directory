@@ -16,10 +16,12 @@ import java.util.List;
 public class EventService {
 
     private final EventRepository eventRepository;
+    private final ReportService reportService;
 
     @Autowired
-    public EventService(EventRepository eventRepository) {
+    public EventService(EventRepository eventRepository, ReportService reportService) {
         this.eventRepository = eventRepository;
+        this.reportService = reportService;
     }
 
     public List<Event> getAllEvents() {
@@ -27,6 +29,7 @@ public class EventService {
     }
 
     public List<Event> getCurrentEvents() {
+        reportService.recordEventVisit();
         return eventRepository.findByDateGreaterThanEqual(LocalDate.now());
     }
 

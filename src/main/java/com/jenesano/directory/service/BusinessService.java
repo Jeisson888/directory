@@ -25,17 +25,19 @@ public class BusinessService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final UserRepository userRepository;
+    private final ReportService reportService;
 
     @Autowired
     public BusinessService(BusinessRepository businessRepository, TypeBusinessRepository typeBusinessRepository,
                            UserService userService, PasswordEncoder passwordEncoder, EmailService emailService,
-                           UserRepository userRepository) {
+                           UserRepository userRepository, ReportService reportService) {
         this.businessRepository = businessRepository;
         this.typeBusinessRepository = typeBusinessRepository;
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
         this.userRepository = userRepository;
+        this.reportService = reportService;
     }
 
     public List<Business> getAllBusinesses() {
@@ -43,6 +45,7 @@ public class BusinessService {
     }
 
     public List<Business> getEnabledBusinesses() {
+        reportService.recordBusinessVisit(null);
         return businessRepository.findByValidatedAndStatus(true, Status.ENABLED);
     }
 
@@ -59,6 +62,7 @@ public class BusinessService {
     }
 
     public List<Business> getAllBusinessesByTypeBusiness(Long typeBusinessId) {
+        reportService.recordBusinessVisit(typeBusinessId);
         return businessRepository.findByValidatedAndStatusAndTypeBusinessId(true, Status.ENABLED, typeBusinessId);
     }
 

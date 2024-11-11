@@ -15,13 +15,16 @@ import java.util.List;
 public class TouristPlaceService {
 
     private final TouristPlaceRepository touristPlaceRepository;
+    private final ReportService reportService;
 
     @Autowired
-    public TouristPlaceService(TouristPlaceRepository touristPlaceRepository) {
+    public TouristPlaceService(TouristPlaceRepository touristPlaceRepository, ReportService reportService) {
         this.touristPlaceRepository = touristPlaceRepository;
+        this.reportService = reportService;
     }
 
     public List<TouristPlace> getAllTouristPlaces() {
+        reportService.recordTouristPlaceVisit();
         return touristPlaceRepository.findAll();
     }
 
