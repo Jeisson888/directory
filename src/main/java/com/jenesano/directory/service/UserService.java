@@ -1,9 +1,6 @@
 package com.jenesano.directory.service;
 
-import com.jenesano.directory.dto.EmailDTO;
-import com.jenesano.directory.dto.LoginDTO;
-import com.jenesano.directory.dto.LoginResponseDTO;
-import com.jenesano.directory.dto.UserDTO;
+import com.jenesano.directory.dto.*;
 import com.jenesano.directory.entity.Status;
 import com.jenesano.directory.entity.TypeUser;
 import com.jenesano.directory.entity.User;
@@ -11,6 +8,7 @@ import com.jenesano.directory.exception.EmailAlreadyExistsException;
 import com.jenesano.directory.exception.EntityNotFoundException;
 import com.jenesano.directory.exception.UsernameAlreadyExistsException;
 import com.jenesano.directory.repository.UserRepository;
+import jakarta.mail.MessagingException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -140,27 +138,46 @@ public class UserService {
                 TypeUser.TOURIST
         );
 
-        emailService.sendCredentialsToEmail(emailDTO.getEmail(), username, randomPassword);
-        userRepository.save(user);
-        return user;
+        try {
+            emailService.sendCredentialsToEmail(emailDTO.getEmail(), username, randomPassword);
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
+        return userRepository.save(user);
     }
 
-    public User updatePassword(Long userId) {
+    public User updatePassword(Long userId, UpdatePasswordDTO updatePasswordDTO) {
         User user = getUserById(userId);
 
-        return null;
+        if (!passwordEncoder.matches(updatePasswordDTO.getOldPassword(), user.getEncryptedPassword())) {
+            throw new IllegalArgumentException("La contraseña actual es incorrecta.");
+        }
+        if (updatePasswordDTO.getOldPassword() == null || updatePasswordDTO.getOldPassword().isEmpty()
+                || updatePasswordDTO.getNewPassword().length() < 5) {
+            throw new IllegalArgumentException("La nueva contraseña debe tener al menos 5 caracteres.");
+        }
+        user.setEncryptedPassword(passwordEncoder.encode(updatePasswordDTO.getNewPassword()));
+
+        return userRepository.save(user);
     }
 
     public User updateStatus(Long userId) {
-        User user = getUserById(userId);
-
         return null;
     }
 
-    public User resetPassword(Long userId) {
-        User user = getUserById(userId);
+    public User resetPassword(EmailDTO emailDTO) {
+        User user = userRepository.findByEmail(emailDTO.getEmail())
+                .orElseThrow(() -> new RuntimeException("Usuario con email " + emailDTO.getEmail() + " no encontrado."));
 
-        return null;
+        String randomPassword = RandomStringUtils.randomAlphanumeric(5);
+        user.setEncryptedPassword(passwordEncoder.encode(randomPassword));
+
+        try {
+            emailService.sendPasswordRecoveryToEmail(user.getEmail(), user.getUsername(), randomPassword);
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
+        return userRepository.save(user);
     }
 
     public void deleteUser(Long userId) {

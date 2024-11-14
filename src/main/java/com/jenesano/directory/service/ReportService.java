@@ -104,7 +104,7 @@ public class ReportService {
 
         document.add(new Paragraph("Reporte de Visitas")
                 .setFontSize(20)
-                .setFontColor(ColorConstants.BLUE)
+                .setFontColor(ColorConstants.BLACK)
                 .setBold()
                 .setTextAlignment(TextAlignment.CENTER));
 

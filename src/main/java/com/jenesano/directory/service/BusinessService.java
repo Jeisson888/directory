@@ -7,6 +7,7 @@ import com.jenesano.directory.exception.EntityNotFoundException;
 import com.jenesano.directory.repository.BusinessRepository;
 import com.jenesano.directory.repository.TypeBusinessRepository;
 import com.jenesano.directory.repository.UserRepository;
+import jakarta.mail.MessagingException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -165,9 +166,13 @@ public class BusinessService {
         user.setEncryptedPassword(passwordEncoder.encode(randomPassword));
         user.setStatus(Status.ENABLED);
 
+        try {
+            emailService.sendCredentialsToEmail(user.getEmail(), user.getUsername(), randomPassword);
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
         businessRepository.save(business);
         userRepository.save(user);
-        emailService.sendCredentialsToEmail(user.getEmail(), user.getUsername(), randomPassword);
     }
 
     public List<TypeBusiness> getAllTypesBusiness() {

@@ -1,9 +1,6 @@
 package com.jenesano.directory.controller;
 
-import com.jenesano.directory.dto.EmailDTO;
-import com.jenesano.directory.dto.LoginDTO;
-import com.jenesano.directory.dto.LoginResponseDTO;
-import com.jenesano.directory.dto.UserDTO;
+import com.jenesano.directory.dto.*;
 import com.jenesano.directory.entity.User;
 import com.jenesano.directory.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +53,19 @@ public class UserController {
     public ResponseEntity<User> createTouristUser(@RequestBody EmailDTO emailDTO) {
         User user = userService.createTouristUser(emailDTO);
         return new ResponseEntity<>(user, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<User> resetPassword(@RequestBody EmailDTO emailDTO) {
+        User user = userService.resetPassword(emailDTO);
+        return ResponseEntity.ok(user);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'OWNER', 'TOURIST')")
+    @PutMapping("/{userId}")
+    public ResponseEntity<User> updatePassword(@PathVariable Long userId, @RequestBody UpdatePasswordDTO updatePasswordDTO) {
+        User user = userService.updatePassword(userId, updatePasswordDTO);
+        return ResponseEntity.ok(user);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
