@@ -12,7 +12,7 @@
 	<artifactId>directory</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>directory</name>
-	<description>Web application for managing businesses, tourist sites and events</description>
+	<description>Web application for managing businesses, events and tourist sites</description>
 	<url/>
 	<licenses>
 		<license/>
