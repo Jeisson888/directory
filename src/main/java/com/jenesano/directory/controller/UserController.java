@@ -55,16 +55,16 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
-    @PostMapping("/reset-password")
-    public ResponseEntity<User> resetPassword(@RequestBody EmailDTO emailDTO) {
-        User user = userService.resetPassword(emailDTO);
-        return ResponseEntity.ok(user);
-    }
-
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'OWNER', 'TOURIST')")
     @PutMapping("/{userId}")
     public ResponseEntity<User> updatePassword(@PathVariable Long userId, @RequestBody UpdatePasswordDTO updatePasswordDTO) {
         User user = userService.updatePassword(userId, updatePasswordDTO);
+        return ResponseEntity.ok(user);
+    }
+
+    @PutMapping("/reset-password")
+    public ResponseEntity<User> resetPassword(@RequestBody EmailDTO emailDTO) {
+        User user = userService.resetPassword(emailDTO);
         return ResponseEntity.ok(user);
     }
 
