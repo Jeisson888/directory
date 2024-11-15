@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 
@@ -30,8 +32,14 @@ public class FileUploadService {
     private Drive getDriveService() throws GeneralSecurityException, IOException {
         HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-        GoogleCredential credential = GoogleCredential.fromStream(new ByteArrayInputStream(credentialsJson.getBytes()))
+
+        InputStream credentialsStream = new FileInputStream("/etc/secrets/google-credentials.json");
+        GoogleCredential credential = GoogleCredential.fromStream(credentialsStream)
                 .createScoped(Collections.singleton("https://www.googleapis.com/auth/drive.file"));
+
+        /*GoogleCredential credential = GoogleCredential.fromStream(new ByteArrayInputStream(credentialsJson.getBytes()))
+                .createScoped(Collections.singleton("https://www.googleapis.com/auth/drive.file"));*/
+
         return new Drive.Builder(httpTransport, jsonFactory, credential)
                 .setApplicationName(applicationName)
                 .build();
