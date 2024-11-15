@@ -33,10 +33,10 @@ public class FileUploadService {
         HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
 
+        System.out.println("hola mundo");
         InputStream credentialsStream = new FileInputStream("/etc/secrets/google-credentials.json");
         GoogleCredential credential = GoogleCredential.fromStream(credentialsStream)
                 .createScoped(Collections.singleton("https://www.googleapis.com/auth/drive.file"));
-
         /*GoogleCredential credential = GoogleCredential.fromStream(new ByteArrayInputStream(credentialsJson.getBytes()))
                 .createScoped(Collections.singleton("https://www.googleapis.com/auth/drive.file"));*/
 
