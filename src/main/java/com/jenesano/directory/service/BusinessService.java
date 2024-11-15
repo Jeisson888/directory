@@ -151,6 +151,10 @@ public class BusinessService {
         if (!businessRepository.existsById(businessId)) {
             throw new EntityNotFoundException("Negocio", businessId);
         }
+        Business business = getBusinessById(businessId);
+        if (getAllBusinessesByUser(business.getUser().getId()).size() == 1) {
+            userRepository.deleteById(business.getUser().getId());
+        }
         businessRepository.deleteById(businessId);
     }
 

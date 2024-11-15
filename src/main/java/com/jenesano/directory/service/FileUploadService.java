@@ -21,7 +21,7 @@ import java.util.Collections;
 @Service
 public class FileUploadService {
 
-    @Value("${google.credentials.file.path}")
+    @Value("${google.credentials.json}")
     private String credentialsJson;
 
     @Value("${google.application.name}")
