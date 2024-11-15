@@ -96,8 +96,10 @@ public class ReportService {
         PdfWriter writer = new PdfWriter(baos);
         Document document = new Document(new com.itextpdf.kernel.pdf.PdfDocument(writer));
 
-        String headerImagePath = "src/main/resources/static/header.png";
-        ImageData headerImageData = ImageDataFactory.create(Paths.get(headerImagePath).toUri().toString());
+        /*String headerImagePath = "src/main/resources/static/header.png";
+        ImageData headerImageData = ImageDataFactory.create(Paths.get(headerImagePath).toUri().toString());*/
+        String headerImageUrl = "https://i.ibb.co/whpsnxb/header.png";
+        ImageData headerImageData = ImageDataFactory.create(headerImageUrl);
         Image headerImage = new Image(headerImageData);
         headerImage.setWidth(UnitValue.createPercentValue(100));
         document.add(headerImage);
