@@ -1,1 +1,6 @@
+com\jenesano\directory\service\EventServiceTest.class
+com\jenesano\directory\service\ReviewServiceTest.class
+com\jenesano\directory\service\UserServiceTest.class
+com\jenesano\directory\service\BusinessServiceTest.class
+com\jenesano\directory\service\TouristPlaceServiceTest.class
 com\jenesano\directory\DirectoryApplicationTests.class

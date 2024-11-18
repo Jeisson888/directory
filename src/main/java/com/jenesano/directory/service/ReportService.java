@@ -22,14 +22,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
-
 
 @Service
 public class ReportService {
@@ -96,8 +94,6 @@ public class ReportService {
         PdfWriter writer = new PdfWriter(baos);
         Document document = new Document(new com.itextpdf.kernel.pdf.PdfDocument(writer));
 
-        /*String headerImagePath = "src/main/resources/static/header.png";
-        ImageData headerImageData = ImageDataFactory.create(Paths.get(headerImagePath).toUri().toString());*/
         String headerImageUrl = "https://i.ibb.co/whpsnxb/header.png";
         ImageData headerImageData = ImageDataFactory.create(headerImageUrl);
         Image headerImage = new Image(headerImageData);

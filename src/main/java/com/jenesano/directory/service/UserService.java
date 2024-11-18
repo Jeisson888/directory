@@ -161,10 +161,6 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User updateStatus(Long userId) {
-        return null;
-    }
-
     public User resetPassword(EmailDTO emailDTO) {
         User user = userRepository.findByEmail(emailDTO.getEmail())
                 .orElseThrow(() -> new RuntimeException("Usuario con email " + emailDTO.getEmail() + " no encontrado."));

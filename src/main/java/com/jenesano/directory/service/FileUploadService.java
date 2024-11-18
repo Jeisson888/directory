@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,8 +33,7 @@ public class FileUploadService {
         HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
 
-        InputStream credentialsStream = new FileInputStream("/etc/secrets/credentials.json");
-        GoogleCredential credential = GoogleCredential.fromStream(credentialsStream)
+        GoogleCredential credential = GoogleCredential.fromStream(new FileInputStream("/etc/secrets/credentials.json"))
                 .createScoped(Collections.singleton("https://www.googleapis.com/auth/drive.file"));
         /*GoogleCredential credential = GoogleCredential.fromStream(new ByteArrayInputStream(credentialsJson.getBytes()))
                 .createScoped(Collections.singleton("https://www.googleapis.com/auth/drive.file"));*/
