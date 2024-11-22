@@ -43,21 +43,25 @@ public class ReportService {
         this.fileUploadService = fileUploadService;
     }
 
+    // Registra una visita a un negocio, utilizando el ID del tipo de negocio.
     public void recordBusinessVisit(Long typeBusinessId) {
         Visit visit = new Visit(Page.BUSINESS, typeBusinessId, LocalDateTime.now());
         visitRepository.save(visit);
     }
 
+    // Registra una visita a un evento.
     public void recordEventVisit() {
         Visit visit = new Visit(Page.EVENT, LocalDateTime.now());
         visitRepository.save(visit);
     }
 
+    // Registra una visita a un lugar turístico.
     public void recordTouristPlaceVisit() {
         Visit visit = new Visit(Page.TOURIST_PLACE, LocalDateTime.now());
         visitRepository.save(visit);
     }
 
+    // Genera un informe de visitas, incluyendo total y visitas por tipo.
     public ReportDTO generateReport() {
         ReportDTO report = new ReportDTO();
 
@@ -87,6 +91,7 @@ public class ReportService {
         return report;
     }
 
+    // Genera el informe en formato PDF y lo sube a un servicio de almacenamiento.
     public String generateReportPdf() throws IOException, GeneralSecurityException {
         ReportDTO report = generateReport();
 
@@ -94,24 +99,28 @@ public class ReportService {
         PdfWriter writer = new PdfWriter(baos);
         Document document = new Document(new com.itextpdf.kernel.pdf.PdfDocument(writer));
 
+        // Añade la imagen de cabecera al PDF.
         String headerImageUrl = "https://i.ibb.co/whpsnxb/header.png";
         ImageData headerImageData = ImageDataFactory.create(headerImageUrl);
         Image headerImage = new Image(headerImageData);
         headerImage.setWidth(UnitValue.createPercentValue(100));
         document.add(headerImage);
 
+        // Añade el título del reporte.
         document.add(new Paragraph("Reporte de Visitas")
                 .setFontSize(20)
                 .setFontColor(ColorConstants.BLACK)
                 .setBold()
                 .setTextAlignment(TextAlignment.CENTER));
 
+        // Añade la fecha de generación del reporte.
         String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         document.add(new Paragraph("Fecha de generación: " + currentDate)
                 .setFontSize(12)
                 .setTextAlignment(TextAlignment.RIGHT)
                 .setMarginBottom(10));
 
+        // Añade la sección de visitas a negocios.
         document.add(new Paragraph("Visitas a Negocios").setFontSize(16).setBold());
         Table businessTable = new Table(2);
         businessTable.setWidth(UnitValue.createPercentValue(100));
@@ -125,6 +134,7 @@ public class ReportService {
         businessTable.addCell(report.getMostPopularTypeBusiness());
         document.add(businessTable);
 
+        // Añade la sección de visitas a eventos.
         document.add(new Paragraph("Visitas a Eventos").setFontSize(16).setBold());
         Table eventTable = new Table(2);
         eventTable.setWidth(UnitValue.createPercentValue(100));
@@ -136,6 +146,7 @@ public class ReportService {
         eventTable.addCell(String.valueOf(report.getLastYearEventVisits()));
         document.add(eventTable);
 
+        // Añade la sección de visitas a lugares turísticos.
         document.add(new Paragraph("Visitas a Lugares Turísticos").setFontSize(16).setBold());
         Table touristPlaceTable = new Table(2);
         touristPlaceTable.setWidth(UnitValue.createPercentValue(100));
@@ -155,6 +166,7 @@ public class ReportService {
         return fileUploadService.uploadPdf(pdfFile);
     }
 
+    // Convierte el archivo PDF en un objeto MultipartFile para subirlo a un servicio.
     private MultipartFile generateMultipartFileFromPdf(byte[] pdfBytes) throws IOException {
         ByteArrayResource resource = new ByteArrayResource(pdfBytes);
         return new MultipartFile() {

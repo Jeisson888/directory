@@ -23,16 +23,19 @@ public class TouristPlaceService {
         this.reportService = reportService;
     }
 
+    // Registra la visita al sitio turístico y devuelve la lista de todos los sitios turísticos.
     public List<TouristPlace> getAllTouristPlaces() {
         reportService.recordTouristPlaceVisit();
         return touristPlaceRepository.findAll();
     }
 
+    // Obtiene un sitio turístico por su ID. Si no existe, lanza una excepción.
     public TouristPlace getTouristPlaceById(Long touristPlaceId) {
         return touristPlaceRepository.findById(touristPlaceId)
                 .orElseThrow(() -> new EntityNotFoundException("Sitios turistico", touristPlaceId));
     }
 
+    // Crea un nuevo sitio turístico usando los datos proporcionados en el DTO.
     public TouristPlace createTouristPlace(TouristPlaceDTO touristPlaceDTO) {
         validateTouristPlaceDTO(touristPlaceDTO);
         TouristPlace touristPlace = new TouristPlace(
@@ -43,6 +46,7 @@ public class TouristPlaceService {
         return touristPlaceRepository.save(touristPlace);
     }
 
+    // Actualiza un sitio turístico existente con los nuevos datos del DTO.
     public TouristPlace updateTouristPlace(Long touristPlaceId, TouristPlaceDTO touristPlaceDTO) {
         TouristPlace touristPlace = getTouristPlaceById(touristPlaceId);
 
@@ -53,12 +57,14 @@ public class TouristPlaceService {
         return touristPlaceRepository.save(touristPlace);
     }
 
+    // Valida que el nombre del sitio turístico no sea nulo o vacío.
     private void validateTouristPlaceDTO(TouristPlaceDTO touristPlaceDTO) {
         if (touristPlaceDTO.getName() == null || touristPlaceDTO.getName().isEmpty()) {
             throw new IllegalArgumentException("El nombre del sitio turistico no puede ser nulo o vacio.");
         }
     }
 
+    // Elimina un sitio turístico por su ID. Lanza excepción si no se encuentra.
     public void deleteTouristPlace(Long touristPlaceId) {
         if (!touristPlaceRepository.existsById(touristPlaceId)) {
             throw new EntityNotFoundException("Sitios turistico", touristPlaceId);
@@ -66,6 +72,7 @@ public class TouristPlaceService {
         touristPlaceRepository.deleteById(touristPlaceId);
     }
 
+    // Añade una imagen al sitio turístico. Si la URL de la imagen es inválida, lanza una excepción.
     public TouristPlace addImage(Long touristPlaceId, ImageDTO imageDTO) {
         TouristPlace touristPlace = getTouristPlaceById(touristPlaceId);
 
@@ -78,6 +85,7 @@ public class TouristPlaceService {
         return touristPlaceRepository.save(touristPlace);
     }
 
+    // Elimina una imagen del sitio turístico por su ID. Lanza excepción si no se encuentra la imagen.
     public void removeImage(Long touristPlaceId, Long imageId) {
         TouristPlace touristPlace = getTouristPlaceById(touristPlaceId);
 
@@ -89,6 +97,7 @@ public class TouristPlaceService {
         touristPlaceRepository.save(touristPlace);
     }
 
+    // Establece la ubicación del sitio turístico con las coordenadas proporcionadas en el DTO.
     public TouristPlace setLocation(Long touristPlaceId, LocationDTO locationDTO) {
         TouristPlace touristPlace = getTouristPlaceById(touristPlaceId);
 

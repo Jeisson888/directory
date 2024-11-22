@@ -42,15 +42,18 @@ public class UserService {
         this.emailService = emailService;
     }
 
+    // Obtiene todos los usuarios almacenados en la base de datos.
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
+    // Obtiene un usuario por su ID. Lanza una excepción si no se encuentra.
     public User getUserById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Usuario", userId));
     }
 
+    // Crea un usuario administrador, validando datos y verificando si el nombre de usuario y correo ya existen.
     public User createAdminUser(UserDTO userDTO) {
         validateUserDTO(userDTO);
         if (userRepository.existsByUsername(userDTO.getUsername())) {
@@ -70,6 +73,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    // Crea un usuario manager, validando datos y verificando si el nombre de usuario y correo ya existen.
     public User createManagerUser(UserDTO userDTO) {
         validateUserDTO(userDTO);
         if (userRepository.existsByUsername(userDTO.getUsername())) {
@@ -89,6 +93,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    // Valida que los campos de usuario (nombre de usuario, contraseña, correo) no sean nulos o vacíos.
     private void validateUserDTO(UserDTO userDTO) {
         if (userDTO.getUsername() == null || userDTO.getUsername().isEmpty() || userDTO.getPassword() == null
                 || userDTO.getPassword().isEmpty() || userDTO.getEmail() == null || userDTO.getEmail().isEmpty()) {
@@ -96,6 +101,7 @@ public class UserService {
         }
     }
 
+    // Crea un usuario propietario, si no existe con el mismo correo, lo crea con un nombre de usuario generado y una contraseña aleatoria.
     public User createOwnerUser(String email) {
         if (email == null || email.isEmpty()) {
             throw new IllegalArgumentException("El correo del usuario no puede ser nulo o vacio.");
@@ -121,6 +127,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    // Crea un usuario turista, validando el correo, generando un nombre de usuario y contraseña aleatorios, y enviando las credenciales por correo.
     public User createTouristUser(EmailDTO emailDTO) {
         if (emailDTO.getEmail() == null || emailDTO.getEmail().isEmpty()) {
             throw new IllegalArgumentException("El correo del usuario no puede ser nulo o vacio.");
@@ -146,6 +153,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    // Actualiza la contraseña de un usuario, validando la contraseña antigua y la nueva.
     public User updatePassword(Long userId, UpdatePasswordDTO updatePasswordDTO) {
         User user = getUserById(userId);
 
@@ -161,6 +169,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    // Restablece la contraseña de un usuario enviando una nueva contraseña aleatoria por correo electrónico.
     public User resetPassword(EmailDTO emailDTO) {
         User user = userRepository.findByEmail(emailDTO.getEmail())
                 .orElseThrow(() -> new RuntimeException("Usuario con email " + emailDTO.getEmail() + " no encontrado."));
@@ -176,6 +185,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    // Elimina un usuario por su ID, verificando que exista en la base de datos.
     public void deleteUser(Long userId) {
         if (!userRepository.existsById(userId)) {
             throw new EntityNotFoundException("Usuario", userId);
@@ -183,6 +193,7 @@ public class UserService {
         userRepository.deleteById(userId);
     }
 
+    // Realiza el proceso de inicio de sesión, validando las credenciales y generando un token JWT.
     public LoginResponseDTO login(LoginDTO loginDTO) {
         if (loginDTO.getUsername() == null || loginDTO.getUsername().isEmpty()
                 || loginDTO.getPassword() == null || loginDTO.getPassword().isEmpty()) {

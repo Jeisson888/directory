@@ -17,6 +17,7 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
+    // Método para enviar un correo electrónico con las credenciales de acceso del usuario.
     public void sendCredentialsToEmail(String email, String username, String password) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
@@ -49,6 +50,7 @@ public class EmailService {
         mailSender.send(message);
     }
 
+    // Método para enviar un correo electrónico con las credenciales de acceso después de una solicitud de recuperación de contraseña.
     public void sendPasswordRecoveryToEmail(String email, String username, String password) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");

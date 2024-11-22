@@ -41,32 +41,39 @@ public class BusinessService {
         this.reportService = reportService;
     }
 
+    // Método para obtener todos los negocios registrados.
     public List<Business> getAllBusinesses() {
         return businessRepository.findAll();
     }
 
+    // Método para obtener los negocios habilitados.
     public List<Business> getEnabledBusinesses() {
         reportService.recordBusinessVisit(null);
         return businessRepository.findByValidatedAndStatus(true, Status.ENABLED);
     }
 
+    // Método para obtener los negocios deshabilitados.
     public List<Business> getDisabledBusinesses() {
         return businessRepository.findByValidatedAndStatus(true, Status.DISABLED);
     }
 
+    // Método para obtener los negocios no validados.
     public List<Business> getNonValidatedBusinesses() {
         return businessRepository.findByValidated(false);
     }
 
+    // Método para obtener los negocios habilitados de un usuario específico.
     public List<Business> getAllBusinessesByUser(Long userId) {
         return businessRepository.findByValidatedAndStatusAndUserId(true, Status.ENABLED, userId);
     }
 
+    // Método para obtener los negocios habilitados por tipo de negocio.
     public List<Business> getAllBusinessesByTypeBusiness(Long typeBusinessId) {
         reportService.recordBusinessVisit(typeBusinessId);
         return businessRepository.findByValidatedAndStatusAndTypeBusinessId(true, Status.ENABLED, typeBusinessId);
     }
 
+    // Método para obtener los negocios habilitados filtrados por calificación promedio.
     public List<Business> getAllBusinessesByReview(int review) {
         List<Business> businesses = getEnabledBusinesses();
 
@@ -81,11 +88,13 @@ public class BusinessService {
                 .collect(Collectors.toList());
     }
 
+    // Método para obtener un negocio por su ID.
     public Business getBusinessById(Long businessId) {
         return businessRepository.findById(businessId)
                 .orElseThrow(() -> new EntityNotFoundException("Negocio", businessId));
     }
 
+    // Método para obtener la calificación promedio de un negocio.
     public double getAverageReview(Long businessId) {
         Business business = getBusinessById(businessId);
 
@@ -95,6 +104,7 @@ public class BusinessService {
                 .orElse(0.0);
     }
 
+    // Método para crear un nuevo negocio a partir de un DTO.
     public Business createBusiness(BusinessDTO businessDTO) {
         TypeBusiness typeBusiness = getTypeBusinessById(businessDTO.getTypeBusinessId());
 
@@ -118,6 +128,7 @@ public class BusinessService {
         return businessRepository.save(business);
     }
 
+    // Método para actualizar un negocio con los datos de un BusinessDTO.
     public Business updateBusiness(Long businessId, BusinessDTO businessDTO) {
         Business business = getBusinessById(businessId);
         TypeBusiness typeBusiness = getTypeBusinessById(businessDTO.getTypeBusinessId());
@@ -138,6 +149,7 @@ public class BusinessService {
         return businessRepository.save(business);
     }
 
+    // Método para validar que los campos del BusinessDTO no sean nulos ni vacíos.
     private void validateBusinessDTO(BusinessDTO businessDTO) {
         if (businessDTO.getName() == null || businessDTO.getName().isEmpty()
                 || businessDTO.getRut() == null || businessDTO.getRut().isEmpty()
@@ -147,6 +159,7 @@ public class BusinessService {
         }
     }
 
+    // Método para eliminar un negocio. Si el negocio tiene solo un dueño, también se elimina el usuario asociado.
     public void deleteBusiness(Long businessId) {
         if (!businessRepository.existsById(businessId)) {
             throw new EntityNotFoundException("Negocio", businessId);
@@ -158,6 +171,7 @@ public class BusinessService {
         businessRepository.deleteById(businessId);
     }
 
+    // Método para validar un negocio. Asocia un usuario con una nueva contraseña y envía un correo con las credenciales.
     public void validateBusiness(Long businessId) {
         Business business = getBusinessById(businessId);
 
@@ -179,15 +193,18 @@ public class BusinessService {
         userRepository.save(user);
     }
 
+    // Método para obtener todos los tipos de negocio disponibles.
     public List<TypeBusiness> getAllTypesBusiness() {
         return this.typeBusinessRepository.findAll();
     }
 
+    // Método para obtener un tipo de negocio por su ID.
     public TypeBusiness getTypeBusinessById(Long typeBusinessId) {
         return typeBusinessRepository.findById(typeBusinessId)
                 .orElseThrow(() -> new EntityNotFoundException("Tipo de negocio", typeBusinessId));
     }
 
+    // Método para crear un nuevo tipo de negocio.
     public TypeBusiness createTypeBusiness(TypeBusinessDTO typeBusinessDTO) {
         validateTypeBusinessDTO(typeBusinessDTO);
         TypeBusiness typeBusiness = new TypeBusiness(typeBusinessDTO.getName());
@@ -195,6 +212,7 @@ public class BusinessService {
         return typeBusinessRepository.save(typeBusiness);
     }
 
+    // Método para actualizar un tipo de negocio con los datos de un TypeBusinessDTO.
     public TypeBusiness updateTypeBusiness(Long typeBusinessId, TypeBusinessDTO typeBusinessDTO) {
         TypeBusiness typeBusiness = getTypeBusinessById(typeBusinessId);
 
@@ -204,12 +222,14 @@ public class BusinessService {
         return typeBusinessRepository.save(typeBusiness);
     }
 
+    // Método para validar que el nombre de un tipo de negocio no sea nulo ni vacío.
     private void validateTypeBusinessDTO(TypeBusinessDTO typeBusinessDTO) {
         if (typeBusinessDTO.getName() == null || typeBusinessDTO.getName().isEmpty()) {
             throw new IllegalArgumentException("El nombre del tipo de negocio no puede ser nulo o vacio.");
         }
     }
 
+    // Método para eliminar un tipo de negocio.
     public void deleteTypeBusiness(Long typeBusinessId) {
         if (!typeBusinessRepository.existsById(typeBusinessId)) {
             throw new EntityNotFoundException("Tipo de negocio", typeBusinessId);
@@ -217,6 +237,7 @@ public class BusinessService {
         typeBusinessRepository.deleteById(typeBusinessId);
     }
 
+    // Método para actualizar la ubicación de un negocio.
     public Business setLocation(Long businessId, LocationDTO locationDTO) {
         Business business = getBusinessById(businessId);
 
@@ -226,6 +247,7 @@ public class BusinessService {
         return businessRepository.save(business);
     }
 
+    // Método para actualizar los horarios de negocio de un negocio.
     public Business setBusinessHours(Long businessId, List<BusinessHourDTO> businessHoursDTO) {
         Business business = getBusinessById(businessId);
 
@@ -247,6 +269,7 @@ public class BusinessService {
         return businessRepository.save(business);
     }
 
+    // Método para agregar una imagen a un negocio.
     public Business addImage(Long businessId, ImageDTO imageDTO) {
         Business business = getBusinessById(businessId);
 
@@ -259,6 +282,7 @@ public class BusinessService {
         return businessRepository.save(business);
     }
 
+    // Método para eliminar una imagen de un negocio.
     public void removeImage(Long businessId, Long imageId) {
         Business business = getBusinessById(businessId);
 
@@ -270,6 +294,7 @@ public class BusinessService {
         businessRepository.save(business);
     }
 
+    // Método para agregar contenido (producto o servicio) a un negocio.
     public Business addBusinessContent(Long businessId, BusinessContentDTO businessContentDTO) {
         Business business = getBusinessById(businessId);
 
@@ -285,6 +310,7 @@ public class BusinessService {
         return businessRepository.save(business);
     }
 
+    // Método para actualizar el contenido de un negocio.
     public Business updateBusinessContent(Long businessId, Long businessContentId, BusinessContentDTO businessContentDTO) {
         Business business = getBusinessById(businessId);
 
@@ -301,12 +327,14 @@ public class BusinessService {
         return businessRepository.save(business);
     }
 
+    // Método para validar que los campos de contenido de negocio no sean nulos ni vacíos.
     private void validateBusinessContentDTO(BusinessContentDTO businessContentDTO) {
         if (businessContentDTO.getName() == null || businessContentDTO.getName().isEmpty()) {
             throw new IllegalArgumentException("El nombre del contenido de negocio no puede ser nulo o vacio.");
         }
     }
 
+    // Método para eliminar contenido de un negocio.
     public void removeBusinessContent(Long businessId, Long businessContentId) {
         Business business = getBusinessById(businessId);
 
@@ -318,6 +346,7 @@ public class BusinessService {
         businessRepository.save(business);
     }
 
+    // Método para agregar una reseña a un negocio.
     public Business addReview(Long businessId, ReviewDTO reviewDTO) {
         Business business = getBusinessById(businessId);
         User user = userService.getUserById(reviewDTO.getUserId());
@@ -335,6 +364,7 @@ public class BusinessService {
         return businessRepository.save(business);
     }
 
+    // Método para actualizar una reseña de un negocio.
     public Business updateReview(Long businessId, Long reviewId, ReviewDTO reviewDTO) {
         Business business = getBusinessById(businessId);
 
@@ -349,12 +379,14 @@ public class BusinessService {
         return businessRepository.save(business);
     }
 
+    // Método para validar que la puntuación de una reseña esté entre 0 y 5.
     private void validateReviewDTO(ReviewDTO reviewDTO) {
         if (reviewDTO.getReview() < 0 || reviewDTO.getReview() > 5) {
             throw new IllegalArgumentException("La review debe estar entre 0 y 5.");
         }
     }
 
+    // Método para eliminar una reseña de un negocio.
     public void removeReview(Long businessId, Long reviewId) {
         Business business = getBusinessById(businessId);
 

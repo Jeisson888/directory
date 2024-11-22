@@ -5,6 +5,7 @@ import com.jenesano.directory.dto.LocationDTO;
 import com.jenesano.directory.dto.TouristPlaceDTO;
 import com.jenesano.directory.entity.TouristPlace;
 import com.jenesano.directory.service.TouristPlaceService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,18 +26,24 @@ public class TouristPlaceController {
         this.touristPlaceService = touristPlaceService;
     }
 
+    @Operation(summary = "Obtener todos los lugares turísticos",
+            description = "Obtiene todos los lugares turísticos disponibles en el sistema.")
     @GetMapping
     public ResponseEntity<List<TouristPlace>> getAllTouristPlaces() {
         List<TouristPlace> touristPlaces = touristPlaceService.getAllTouristPlaces();
         return ResponseEntity.ok(touristPlaces);
     }
 
+    @Operation(summary = "Obtener un lugar turístico por ID",
+            description = "Obtiene un lugar turístico específico mediante su ID.")
     @GetMapping("/{touristPlaceId}")
     public ResponseEntity<TouristPlace> getTouristPlaceById(@PathVariable Long touristPlaceId) {
         TouristPlace touristPlace = touristPlaceService.getTouristPlaceById(touristPlaceId);
         return ResponseEntity.ok(touristPlace);
     }
 
+    @Operation(summary = "Crear un nuevo lugar turístico",
+            description = "Permite a los usuarios con roles ADMIN o MANAGER crear un nuevo lugar turístico.")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @PostMapping
     public ResponseEntity<TouristPlace> createTouristPlace(@RequestBody TouristPlaceDTO touristPlaceDTO) {
@@ -44,6 +51,8 @@ public class TouristPlaceController {
         return new ResponseEntity<>(touristPlace, HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Actualizar un lugar turístico",
+            description = "Permite a los usuarios con roles ADMIN o MANAGER actualizar un lugar turístico existente.")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @PutMapping("/{touristPlaceId}")
     public ResponseEntity<TouristPlace> updateTouristPlace(@PathVariable Long touristPlaceId, @RequestBody TouristPlaceDTO touristPlaceDTO) {
@@ -51,6 +60,8 @@ public class TouristPlaceController {
         return ResponseEntity.ok(touristPlace);
     }
 
+    @Operation(summary = "Eliminar un lugar turístico",
+            description = "Permite a los usuarios con roles ADMIN o MANAGER eliminar un lugar turístico específico.")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @DeleteMapping("/{touristPlaceId}")
     public ResponseEntity<Void> deleteTouristPlace(@PathVariable Long touristPlaceId) {
@@ -58,6 +69,8 @@ public class TouristPlaceController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Añadir una imagen a un lugar turístico",
+            description = "Permite a los usuarios con roles ADMIN o MANAGER añadir una imagen a un lugar turístico.")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @PostMapping("/{touristPlaceId}/images")
     public ResponseEntity<TouristPlace> addImage(@PathVariable Long touristPlaceId, @RequestBody ImageDTO imageDTO) {
@@ -65,6 +78,8 @@ public class TouristPlaceController {
         return ResponseEntity.ok(touristPlace);
     }
 
+    @Operation(summary = "Eliminar una imagen de un lugar turístico",
+            description = "Permite a los usuarios con roles ADMIN o MANAGER eliminar una imagen de un lugar turístico.")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @DeleteMapping("/{touristPlaceId}/images/{imageId}")
     public ResponseEntity<Void> removeImage(@PathVariable Long touristPlaceId, @PathVariable Long imageId) {
@@ -72,6 +87,8 @@ public class TouristPlaceController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Establecer la ubicación de un lugar turístico",
+            description = "Permite a los usuarios con roles ADMIN o MANAGER establecer la ubicación de un lugar turístico.")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @PostMapping("/{touristPlaceId}/location")
     public ResponseEntity<TouristPlace> setLocation(@PathVariable Long touristPlaceId, @RequestBody LocationDTO locationDTO) {

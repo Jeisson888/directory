@@ -1,6 +1,7 @@
 package com.jenesano.directory.controller;
 
 import com.jenesano.directory.service.ImageUploadService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,8 @@ public class ImageUploadController {
         this.imageUploadService = imageUploadService;
     }
 
+    @Operation(summary = "Subir una imagen",
+            description = "Permite subir una imagen al sistema y devuelve la URL de la imagen subida. Requiere rol de ADMIN, MANAGER o OWNER.")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'OWNER')")
     @PostMapping("/upload")
     public ResponseEntity<String> uploadImage(@RequestParam("image") MultipartFile image) {

@@ -24,20 +24,25 @@ public class EventService {
         this.reportService = reportService;
     }
 
+    // Método que devuelve todas las instancias de eventos en la base de datos.
     public List<Event> getAllEvents() {
         return eventRepository.findAll();
     }
 
+    // Método que devuelve los eventos cuya fecha es igual o posterior a la fecha actual.
+    // Además, registra una visita al evento.
     public List<Event> getCurrentEvents() {
         reportService.recordEventVisit();
         return eventRepository.findByDateGreaterThanEqual(LocalDate.now());
     }
 
+    // Método que busca un evento por su identificador. Lanza una excepción si no lo encuentra.
     public Event getEventById(Long eventId) {
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> new EntityNotFoundException("evento", eventId));
     }
 
+    // Método que crea un nuevo evento a partir de los datos proporcionados.
     public Event createEvent(EventDTO eventDTO) {
         validateEventDTO(eventDTO);
         Event event = new Event(
@@ -49,6 +54,7 @@ public class EventService {
         return eventRepository.save(event);
     }
 
+    // Método que actualiza los datos de un evento existente.
     public Event updateEvent(Long eventId, EventDTO eventDTO) {
         Event event = getEventById(eventId);
 
@@ -60,12 +66,14 @@ public class EventService {
         return eventRepository.save(event);
     }
 
+    // Método para validar que los datos del evento sean correctos.
     private void validateEventDTO(EventDTO eventDTO) {
         if (eventDTO.getName() == null || eventDTO.getName().isEmpty() || eventDTO.getDate() == null) {
             throw new IllegalArgumentException("El nombre y fecha del evento no pueden ser nulos o vacios.");
         }
     }
 
+    // Método que elimina un evento por su identificador. Lanza una excepción si no lo encuentra.
     public void deleteEvent(Long eventId) {
         if (!eventRepository.existsById(eventId)) {
             throw new EntityNotFoundException("evento", eventId);
@@ -73,6 +81,7 @@ public class EventService {
         eventRepository.deleteById(eventId);
     }
 
+    // Método que agrega una imagen a un evento.
     public Event addImage(Long eventId, ImageDTO imageDTO) {
         Event event = getEventById(eventId);
 
@@ -85,6 +94,7 @@ public class EventService {
         return eventRepository.save(event);
     }
 
+    // Método que elimina una imagen de un evento.
     public void removeImage(Long eventId, Long imageId) {
         Event event = getEventById(eventId);
 

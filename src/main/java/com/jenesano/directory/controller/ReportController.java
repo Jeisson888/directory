@@ -2,6 +2,7 @@ package com.jenesano.directory.controller;
 
 import com.jenesano.directory.dto.ReportDTO;
 import com.jenesano.directory.service.ReportService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,6 +24,8 @@ public class ReportController {
         this.reportService = reportService;
     }
 
+    @Operation(summary = "Generar un reporte",
+            description = "Genera un reporte general con información relevante del sistema. Requiere rol de ADMIN o MANAGER.")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @GetMapping
     public ResponseEntity<ReportDTO> generateReport() {
@@ -30,6 +33,8 @@ public class ReportController {
         return ResponseEntity.ok(reportDTO);
     }
 
+    @Operation(summary = "Generar un reporte en PDF",
+            description = "Genera un reporte en formato PDF y devuelve la URL del archivo generado. Requiere rol de ADMIN o MANAGER.")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @GetMapping("/pdf")
     public ResponseEntity<String> generateReportPdf() {
