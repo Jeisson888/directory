@@ -110,7 +110,7 @@ public class BusinessController {
 
     @Operation(summary = "Actualizar un negocio",
             description = "Actualiza los detalles de un negocio existente. Requiere rol de ADMIN o OWNER.")
-    @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'OWNER')")
     @PutMapping("/{businessId}")
     public ResponseEntity<Business> updateBusiness(@PathVariable Long businessId, @RequestBody BusinessDTO businessDTO) {
         Business business = businessService.updateBusiness(businessId, businessDTO);
